@@ -133,7 +133,7 @@ func readRedshiftGroup(d *schema.ResourceData, tx *sql.Tx) error {
 	err := tx.QueryRow("SELECT groname, grolist FROM pg_group WHERE grosysid = $1", d.Id()).Scan(&groupname, &users)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return err
 	}
 
@@ -141,7 +141,7 @@ func readRedshiftGroup(d *schema.ResourceData, tx *sql.Tx) error {
 
 	//Notes on postgres array types https://gist.github.com/adharris/4163702, eg startying with underscore _int4
 
-	if users.Valid {
+	if users.Valid && users.String != "{}" {
 		var userIdsAsString = strings.Split(users.String[1:len(users.String)-1], ",")
 		var userIdsAsInt = []int{}
 
@@ -240,7 +240,7 @@ func resourceRedshiftGroupDelete(d *schema.ResourceData, meta interface{}) error
 	_, err := client.Exec("DROP GROUP " + d.Get("group_name").(string))
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return err
 	}
 

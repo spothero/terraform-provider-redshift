@@ -3,10 +3,11 @@ package redshift
 import (
 	"database/sql"
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func redshiftUser() *schema.Resource {
@@ -26,8 +27,9 @@ func redshiftUser() *schema.Resource {
 				Required: true,
 			},
 			"password": { //Can we read this back from the db? If not hwo can we tell if its changed? Do we need to use md5hash?
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 			"valid_until": {
 				Type:     schema.TypeString,
@@ -122,7 +124,7 @@ func resourceRedshiftUserCreate(d *schema.ResourceData, meta interface{}) error 
 		} else if v.(string) == "RESTRICTED" {
 			createStatement += " SYSLOG ACCESS RESTRICTED "
 		} else {
-			log.Fatalf("%v is not a valid value for SYSLOG ACCESS", v)
+			log.Printf("%v is not a valid value for SYSLOG ACCESS", v)
 			panic(v.(string))
 		}
 	}
@@ -144,7 +146,7 @@ func resourceRedshiftUserCreate(d *schema.ResourceData, meta interface{}) error 
 
 	if err != nil {
 		log.Print("User does not exist in pg_user_info table")
-		log.Fatal(err)
+		log.Print(err)
 		return err
 	}
 
@@ -203,7 +205,7 @@ func readRedshiftUser(d *schema.ResourceData, tx *sql.Tx) error {
 
 	if err != nil {
 		log.Print("Reading user does not exist")
-		log.Fatal(err)
+		log.Print(err)
 		return err
 	}
 
